@@ -1,0 +1,96 @@
+---
+title: "Cuestiones"
+author: "Amalia Guarner Giner"
+date: "2023-05-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**CUESTIONES**
+
+Pregunta 1:
+
+```{r}
+library(stringr)
+
+texto <- "Pues sepa Vuestra Merced, ante todas cosas, que a mí llaman Lázaro de Tormes, hijo de Tomé González y de Antona Pérez, naturales de Tejares, aldea de Salamanca. Mi nacimiento fue dentro del río Tormes, por la cual causa tomé el sobrenombre; y fue de esta manera: mi padre, que Dios perdone, tenía cargo de proveer una molienda de una aceña que está ribera de aquel río, en la cual fue molinero más de quince años; y, estando mi madre una noche en la aceña, preñada de mí, tomóle el parto y parióme allí. De manera que con verdad me puedo decir nacido en el río. Pues siendo yo niño de ocho años, achacaron a mi padre ciertas sangrías mal hechas en los costales de los que allí a moler venían, por lo cual fue preso, y confesó y no negó, y padeció persecución por justicia. Espero en Dios que está en la gloria, pues el Evangelio los llama bienaventurados. En este tiempo se hizo cierta armada contra moros, entre los cuales fue mi padre (que a la sazón estaba desterrado por el desastre ya dicho), con cargo de acemilero de un caballero que allá fue. Y con su señor, como leal criado, feneció su vida. Mi viuda madre, como sin marido y sin abrigo se viese, determinó arrimarse a los buenos por ser uno de ellos, y vínose a vivir a la ciudad y alquiló una casilla y metióse a guisar de comer a ciertos estudiantes, y lavaba la ropa a ciertos mozos de caballos del comendador de la Magdalena, de manera que fue frecuentando las caballerizas."
+
+
+caracteres <- table(strsplit(texto, "")[[1]])
+for (caracter in names(caracteres)) {
+  cat(paste("El caracter '", caracter, "' aparece ", caracteres[caracter], " veces.\n", sep = ""))
+}
+
+# Contamos vocales sin acentuar
+vocales_sin_acentos <- str_count(texto, "[aeiou]")
+sum(vocales_sin_acentos)
+
+# Contamos las no vocales
+texto_sin_vocales <- gsub("[aeiou]", "", texto, ignore.case = TRUE)
+texto_sin_no_vocales <- gsub("[^bcdfghjklmnpqrstvwxyzñ]", "", texto_sin_vocales, ignore.case = TRUE)
+num_no_vocales <- nchar(texto_sin_vocales)
+num_no_vocales
+
+# Contamos las vocales sin acentuar
+sum(str_count(str_to_lower(texto), "[aeiou]"))
+
+# Contamos espacios
+sum(str_count(texto, "\\s"))
+```
+
+Pregunta 2:
+
+```{r}
+Nosotros <- read.delim("data/Nosotros.tsv")
+Nosotros$fecha <- gsub(pattern="/",replacement = "-",x=Nosotros$FechaNac.DD.MM.YYY.)
+s <- Nosotros %>% mutate(diferencia = difftime(dmy("03-02-2021"),dmy(fecha))) %>% separate(col=diferencia, into=c("num","d"),sep = '[ ]') %>% select(num)
+
+s$num <- as.numeric(s$num)
+sum(s) / 365
+
+reglaboxplot <- function(x) {
+  res <- ifelse(x > quantile(x,0.75,na.rm=T)+1.5*IQR(x,na.rm=T) | x < quantile(x,0.25,na.rm=T)-1.5*IQR(x,na.rm=T),T,F )
+ }
+  dff <- read.csv("data/UScereal1.csv")
+  dff$t <- reglaboxplot(dff$calories)
+ dff <- dff %>% filter(t==F) 
+ median(dff$calories)
+
+library(tidyverse)
+madm <- function(x, na.rm=T) { 
+  res <- 1.4826 * median(abs(x-median(x,na.rm=T)),na.rm=T)
+  
+  return(res)
+}
+reglahampel <- function(x) { 
+  res <- ifelse(abs(x-median(x,na.rm=TRUE))> 3*madm(x,na.rm = T),TRUE,FALSE)
+  return(res) #true si es outlier
+  
+}
+
+df <- read.csv("data/UScereal.csv")
+
+df$out <- reglahampel(df$carbo)
+ df <- df %>% filter(out==F) 
+ mean(df$carbo)
+```
+
+Pregunta 3:
+
+```{r}
+library(readr)
+datos <- read_csv("data/UScereal.csv")
+
+# Calcular los límites del boxplot para la variable 'calories'
+reglaboxplot <- function(x) {
+  res <- ifelse(x > quantile(x,0.75,na.rm=T)+1.5*IQR(x,na.rm=T) | x < quantile(x,0.25,na.rm=T)-1.5*IQR(x,na.rm=T),T,F )
+ }
+  dff <- read.csv("data/UScereal (2).csv")
+  dff$t <- reglaboxplot(dff$fat)
+ dff <- dff %>% filter(t==F) 
+ sd(dff$fat)
+```
+
